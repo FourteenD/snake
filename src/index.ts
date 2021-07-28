@@ -1,8 +1,6 @@
-// 定义Food类
 class Food {
   element: HTMLElement
   constructor() {
-    // 获取页面中的food元素并将其赋值给element
     this.element = document.getElementById('food')!
   }
   get X() {
@@ -24,10 +22,10 @@ class ScorePanel {
   level = 1
   scoreEle: HTMLElement
   levelEle: HTMLElement
-  maxLevel: Number
-  upScore: Number
+  maxLevel: number
+  upScore: number
 
-  constructor(maxLevel: Number = 10, upScore: Number = 10) {
+  constructor(maxLevel: number = 10, upScore: number = 10) {
     this.scoreEle = document.getElementById('score')!
     this.levelEle = document.getElementById('level')!
     this.maxLevel = maxLevel
@@ -47,7 +45,7 @@ class ScorePanel {
   }
 }
 
-const scorePanel = new ScorePanel(100,1)
-for (let index = 0; index < 10; index++) {
-  scorePanel.addScore()
-}
+const scorePanel = new ScorePanel(100, 1)
+const food = new Food()
+scorePanel.addScore()
+food.change()

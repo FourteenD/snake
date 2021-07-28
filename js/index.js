@@ -1,8 +1,6 @@
 "use strict";
-// 定义Food类
 var Food = /** @class */ (function () {
     function Food() {
-        // 获取页面中的food元素并将其赋值给element
         this.element = document.getElementById('food');
     }
     Object.defineProperty(Food.prototype, "X", {
@@ -52,6 +50,6 @@ var ScorePanel = /** @class */ (function () {
     return ScorePanel;
 }());
 var scorePanel = new ScorePanel(100, 1);
-for (var index = 0; index < 10; index++) {
-    scorePanel.addScore();
-}
+var food = new Food();
+scorePanel.addScore();
+food.change();

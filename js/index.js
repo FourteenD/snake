@@ -49,7 +49,37 @@ var ScorePanel = /** @class */ (function () {
     };
     return ScorePanel;
 }());
-var scorePanel = new ScorePanel(100, 1);
+var Snake = /** @class */ (function () {
+    function Snake() {
+        this.element = document.getElementById('snake');
+        this.head = document.querySelector('#snake > div');
+        this.bodies = this.element.getElementsByTagName('div');
+    }
+    Object.defineProperty(Snake.prototype, "X", {
+        get: function () {
+            return this.head.offsetLeft;
+        },
+        set: function (value) {
+            this.head.style.left = value + "px";
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Snake.prototype, "Y", {
+        get: function () {
+            return this.head.offsetTop;
+        },
+        set: function (value) {
+            this.head.style.top = value + "px";
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Snake.prototype.addBody = function () {
+        this.element.insertAdjacentHTML('beforeend', '<div></div>');
+    };
+    return Snake;
+}());
+var scorePanel = new ScorePanel();
 var food = new Food();
-scorePanel.addScore();
-food.change();
+var snake = new Snake();

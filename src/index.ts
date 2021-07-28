@@ -9,7 +9,7 @@ class Food {
   get Y() {
     return this.element.offsetTop
   }
-  change() {
+  change(): void {
     let top = Math.round(Math.random() * 29 * 10)
     let left = Math.round(Math.random() * 29 * 10)
     this.element.style.left = `${left}px`
@@ -32,13 +32,13 @@ class ScorePanel {
     this.upScore = upScore
   }
 
-  addScore() {
+  addScore(): void {
     this.scoreEle.innerHTML = `${++this.score}`
     if (this.score % this.upScore === 0) {
       this.levelUp()
     }
   }
-  levelUp() {
+  levelUp(): void {
     if (this.level < this.maxLevel) {
       this.levelEle.innerHTML = `${++this.level}`
     }
@@ -70,7 +70,7 @@ class Snake {
     this.head.style.top = `${value}px`
   }
 
-  addBody() {
+  addBody(): void {
     this.element.insertAdjacentHTML('beforeend', '<div></div>')
   }
 }
@@ -78,3 +78,13 @@ class Snake {
 const scorePanel = new ScorePanel()
 const food = new Food()
 const snake = new Snake()
+
+interface Inter {
+  length: number
+}
+
+function fn<T extends Inter>(a: T): number {
+  return a.length
+}
+
+fn([])

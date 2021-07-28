@@ -83,3 +83,7 @@ var Snake = /** @class */ (function () {
 var scorePanel = new ScorePanel();
 var food = new Food();
 var snake = new Snake();
+function fn(a) {
+    return a.length;
+}
+fn([]);

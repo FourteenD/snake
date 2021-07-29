@@ -79,12 +79,3 @@ const scorePanel = new ScorePanel()
 const food = new Food()
 const snake = new Snake()
 
-interface Inter {
-  length: number
-}
-
-function fn<T extends Inter>(a: T): number {
-  return a.length
-}
-
-fn([])

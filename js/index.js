@@ -21,10 +21,10 @@ var Food = /** @class */ (function () {
         enumerable: false,
         configurable: true
     });
-    Food.prototype.change = function () {
-        // 生成0-29的随机数
-        var top = Math.round(Math.random() * 29 * 10);
-        var left = Math.round(Math.random() * 29 * 10);
+    Food.prototype.change = function (W, H, headW, headH) {
+        // 生成场地大小内的随机数
+        var left = Math.ceil(Math.random() * (W / headW)) * headW - headW;
+        var top = Math.ceil(Math.random() * (H / headH)) * headH - headH;
         // 使用随机数修改食物的X、Y轴
         this.element.style.left = left + "px";
         this.element.style.top = top + "px";
@@ -72,6 +72,21 @@ var Snake = /** @class */ (function () {
         // 获取蛇头
         this.head = document.querySelector('#snake > div');
     }
+    Object.defineProperty(Snake.prototype, "headW", {
+        // 获取蛇头的大小
+        get: function () {
+            return this.head.offsetWidth;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Snake.prototype, "headH", {
+        get: function () {
+            return this.head.offsetHeight;
+        },
+        enumerable: false,
+        configurable: true
+    });
     Object.defineProperty(Snake.prototype, "X", {
         // 获取蛇头XY轴的位置
         get: function () {
@@ -79,6 +94,10 @@ var Snake = /** @class */ (function () {
         },
         // 修改蛇头XY轴的位置
         set: function (value) {
+            // 新值和就值相等直接返回，不修改蛇的位置
+            if (this.X === value) {
+                return;
+            }
             this.head.style.left = value + "px";
         },
         enumerable: false,
@@ -89,23 +108,56 @@ var Snake = /** @class */ (function () {
             return this.head.offsetTop;
         },
         set: function (value) {
+            // 新值和就值相等直接返回，不修改蛇的位置
+            if (this.Y === value) {
+                return;
+            }
             this.head.style.top = value + "px";
         },
         enumerable: false,
         configurable: true
     });
+    // 增加身体
     Snake.prototype.addBody = function () {
         this.element.insertAdjacentHTML('beforeend', '<div></div>');
     };
     return Snake;
 }());
+// 场地类
+var Venue = /** @class */ (function () {
+    function Venue() {
+        this.element = document.getElementById('stage');
+    }
+    Object.defineProperty(Venue.prototype, "W", {
+        get: function () {
+            return this.element.clientWidth;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Venue.prototype, "H", {
+        get: function () {
+            return this.element.clientHeight;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    return Venue;
+}());
+// 控制器
 var GameControl = /** @class */ (function () {
-    function GameControl() {
+    function GameControl(initRate, maxLevel, upScore) {
+        if (initRate === void 0) { initRate = 500; }
         // 蛇的移动方向
         this.direction = '';
+        // 蛇是否活着
+        this.isLive = true;
+        this.venue = new Venue();
         this.snake = new Snake();
         this.food = new Food();
-        this.scorePanel = new ScorePanel();
+        this.scorePanel = new ScorePanel(maxLevel, upScore);
+        // 初始移动速度
+        this.initRate = initRate;
         // 初始化游戏
         this.init();
     }
@@ -113,15 +165,28 @@ var GameControl = /** @class */ (function () {
     GameControl.prototype.init = function () {
         // 绑定键盘事件
         document.addEventListener('keydown', this.keydownHandler.bind(this));
+        // 执行运行方法，使蛇移动
+        this.run();
     };
     // 创建键盘按下的响应函数
     GameControl.prototype.keydownHandler = function (event) {
         this.direction = event.key;
     };
+    // 检测蛇是否吃到食物
+    GameControl.prototype.checkEating = function (X, Y) {
+        if (X === this.food.X && Y === this.food.Y) {
+            this.food.change(this.venue.W, this.venue.H, this.snake.headW, this.snake.headH);
+            this.scorePanel.addScore();
+            this.snake.addBody();
+        }
+    };
     // 移动
     GameControl.prototype.run = function () {
         var X = this.snake.X;
         var Y = this.snake.Y;
+        // 一节身体大小
+        var headW = this.snake.headW;
+        var headH = this.snake.headH;
         // 按键值：
         // ArrowUp  || IE:UP
         // ArrowDown  || IE:Down
@@ -131,29 +196,54 @@ var GameControl = /** @class */ (function () {
         switch (this.direction) {
             case 'ArrowUp':
             case 'Up':
-                Y -= 10;
+                Y -= headH;
                 break;
             case 'ArrowDown':
             case 'Down':
-                Y += 10;
+                Y += headH;
                 break;
             case 'ArrowLeft':
             case 'Left':
-                X -= 10;
+                X -= headW;
                 break;
             case 'ArrowRight':
             case 'Right':
-                X += 10;
+                X += headW;
                 break;
             default:
                 break;
         }
-        this.snake.X = X;
-        this.snake.Y = Y;
+        // 是否吃到食物
+        this.checkEating(X, Y);
+        // 修改蛇头的位置
+        try {
+            // 判断是否撞墙
+            if (X < 0 ||
+                X > this.venue.W - headW ||
+                Y < 0 ||
+                Y > this.venue.H - headW) {
+                throw new Error('蛇撞墙了');
+            }
+            this.snake.X = X;
+            this.snake.Y = Y;
+        }
+        catch (error) {
+            // 如果上方代码抛出错误
+            alert(error + 'GAME OVER!');
+            // 将isLive设为false
+            this.isLive = false;
+        }
+        // 将速度按等级划分
+        var speedRate = (this.scorePanel.level - 1) *
+            Math.round(this.initRate / this.scorePanel.level);
+        // 自调用定时器
+        this.isLive && setTimeout(this.run.bind(this), this.initRate - speedRate);
     };
     return GameControl;
 }());
 var gc = new GameControl();
+var v = new Venue();
+var f = new Food();
 function test() {
-    console.log(gc.direction);
+    f.change(300, 300, 10, 10);
 }

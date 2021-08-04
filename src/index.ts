@@ -94,18 +94,77 @@ class Snake {
     if (this.X === value) {
       return
     }
+    // 多个蛇身元素时不能掉头
+    if (
+      this.bodies[1] &&
+      (this.bodies[1] as HTMLElement).offsetLeft === value
+    ) {
+      // 像左走
+      if (value > this.X) {
+        value = this.X - this.headW
+      }
+      // 向右走
+      else {
+        value = this.X + this.headW
+      }
+    }
+    // 移动身体
+    this.moveBody()
+
     this.head.style.left = `${value}px`
+    // 检查是否吃到自己
+    this.checkHeadBody()
   }
   set Y(value: number) {
     // 新值和就值相等直接返回，不修改蛇的位置
     if (this.Y === value) {
       return
     }
+    // 多个蛇身元素时不能掉头
+    if (this.bodies[1] && (this.bodies[1] as HTMLElement).offsetTop === value) {
+      // 像上走
+      if (value > this.Y) {
+        value = this.Y - this.headH
+      }
+      // 向下走
+      else {
+        value = this.Y + this.headH
+      }
+    }
+    // 移动身体
+    this.moveBody()
+
     this.head.style.top = `${value}px`
+    // 检查是否吃到自己
+    this.checkHeadBody()
   }
   // 增加身体
   addBody(): void {
     this.element.insertAdjacentHTML('beforeend', '<div></div>')
+  }
+
+  // 蛇的移动
+  moveBody(): void {
+    for (let index = this.bodies.length - 1; index > 0; index--) {
+      // 获取前边身体的位置
+      let X = (this.bodies[index - 1] as HTMLElement).offsetLeft
+      let Y = (this.bodies[index - 1] as HTMLElement).offsetTop
+
+      // 将值设置到当前身体
+      ;(this.bodies[index] as HTMLElement).style.left = `${X}px`
+      ;(this.bodies[index] as HTMLElement).style.top = `${Y}px`
+    }
+  }
+
+  // 检查是否吃到自己
+  checkHeadBody(): void {
+    for (let index = 1; index < this.bodies.length; index++) {
+      let bd = this.bodies[index] as HTMLElement
+      // 判断是否撞到自己
+      if (this.X === bd.offsetLeft && this.Y === bd.offsetTop) {
+        throw new Error('吃到自己了~~')
+      }
+    }
   }
 }
 
@@ -139,11 +198,11 @@ class GameControl {
   // 蛇是否活着
   isLive: Boolean = true
 
-  constructor(initRate: number = 500,maxLevel?: number,upScore?: number) {
+  constructor(initRate: number = 500, maxLevel?: number, upScore?: number) {
     this.venue = new Venue()
     this.snake = new Snake()
     this.food = new Food()
-    this.scorePanel = new ScorePanel(maxLevel,upScore)
+    this.scorePanel = new ScorePanel(maxLevel, upScore)
     // 初始移动速度
     this.initRate = initRate
     // 初始化游戏
@@ -237,9 +296,4 @@ class GameControl {
     this.isLive && setTimeout(this.run.bind(this), this.initRate - speedRate)
   }
 }
-const gc = new GameControl()
-const v = new Venue()
-const f = new Food()
-function test() {
-  f.change(300, 300, 10, 10)
-}
+new GameControl(100,99,99)

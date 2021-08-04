@@ -98,7 +98,23 @@ var Snake = /** @class */ (function () {
             if (this.X === value) {
                 return;
             }
+            // 多个蛇身元素时不能掉头
+            if (this.bodies[1] &&
+                this.bodies[1].offsetLeft === value) {
+                // 像左走
+                if (value > this.X) {
+                    value = this.X - this.headW;
+                }
+                // 向右走
+                else {
+                    value = this.X + this.headW;
+                }
+            }
+            // 移动身体
+            this.moveBody();
             this.head.style.left = value + "px";
+            // 检查是否吃到自己
+            this.checkHeadBody();
         },
         enumerable: false,
         configurable: true
@@ -112,7 +128,22 @@ var Snake = /** @class */ (function () {
             if (this.Y === value) {
                 return;
             }
+            // 多个蛇身元素时不能掉头
+            if (this.bodies[1] && this.bodies[1].offsetTop === value) {
+                // 像上走
+                if (value > this.Y) {
+                    value = this.Y - this.headH;
+                }
+                // 向下走
+                else {
+                    value = this.Y + this.headH;
+                }
+            }
+            // 移动身体
+            this.moveBody();
             this.head.style.top = value + "px";
+            // 检查是否吃到自己
+            this.checkHeadBody();
         },
         enumerable: false,
         configurable: true
@@ -120,6 +151,26 @@ var Snake = /** @class */ (function () {
     // 增加身体
     Snake.prototype.addBody = function () {
         this.element.insertAdjacentHTML('beforeend', '<div></div>');
+    };
+    // 蛇的移动
+    Snake.prototype.moveBody = function () {
+        for (var index = this.bodies.length - 1; index > 0; index--) {
+            // 获取前边身体的位置
+            var X = this.bodies[index - 1].offsetLeft;
+            var Y = this.bodies[index - 1].offsetTop;
+            this.bodies[index].style.left = X + "px";
+            this.bodies[index].style.top = Y + "px";
+        }
+    };
+    // 检查是否吃到自己
+    Snake.prototype.checkHeadBody = function () {
+        for (var index = 1; index < this.bodies.length; index++) {
+            var bd = this.bodies[index];
+            // 判断是否撞到自己
+            if (this.X === bd.offsetLeft && this.Y === bd.offsetTop) {
+                throw new Error('吃到自己了~~');
+            }
+        }
     };
     return Snake;
 }());
@@ -241,9 +292,4 @@ var GameControl = /** @class */ (function () {
     };
     return GameControl;
 }());
-var gc = new GameControl();
-var v = new Venue();
-var f = new Food();
-function test() {
-    f.change(300, 300, 10, 10);
-}
+new GameControl(100, 99, 99);

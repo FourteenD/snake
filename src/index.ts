@@ -58,6 +58,7 @@ class ScorePanel {
     }
   }
 }
+
 // 蛇类
 class Snake {
   // 整个蛇
@@ -181,6 +182,7 @@ class Venue {
     return this.element.clientHeight
   }
 }
+
 // 控制器
 class GameControl {
   // 场地的实例
@@ -296,4 +298,4 @@ class GameControl {
     this.isLive && setTimeout(this.run.bind(this), this.initRate - speedRate)
   }
 }
-new GameControl(100,99,99)
+new GameControl(500, 20, 5)

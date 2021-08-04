@@ -292,4 +292,4 @@ var GameControl = /** @class */ (function () {
     };
     return GameControl;
 }());
-new GameControl(100, 99, 99);
+new GameControl(500, 20, 5);
